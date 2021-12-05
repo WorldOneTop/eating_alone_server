@@ -3,6 +3,9 @@ from __future__ import unicode_literals
 import os
 import json
 from django.shortcuts import render
+from django.http import HttpResponse
+
+from .models import User, Review, Image, House_main, House_detail, House_menu, Question
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,64 +31,85 @@ def kakaoMap(request):
 
 
     """     ACCOUNT     """
-def login():
-    pass
-def logout():
-    pass
-def signUp():
-    pass
-def accoutOut():#회원탈퇴
-    pass
-def updateNickname():
-    pass
-def updateImage():
-    pass
-def updatePassword():
-    pass
-def findAccount():
-    pass
-def selectMyReview():
-    pass
-def selectMyHouse():
-    pass
+def login(request):
+    return HttpResponse("OK")
+
+def logout(request):
+    return HttpResponse("OK")
+
+def signUp(request):
+    User.objects.create(request.GET)
+    return HttpResponse("OK")
+
+def accoutOut(request):#회원탈퇴
+    return HttpResponse("OK")
+
+def updateNickname(request):
+    return HttpResponse("OK")
+
+def updateImage(request):
+    return HttpResponse("OK")
+
+def updatePassword(request):
+    return HttpResponse("OK")
+
+def findAccount(request):
+    return HttpResponse("OK")
+
+def selectMyReview(request):
+    return HttpResponse("OK")
+
+def selectMyHouse(request):
+    return HttpResponse("OK")
 
 
     """     QUESTION    """
-def createQnA():
-    pass
-def selectMyQuestion():
-    pass
-def selectFAQ():
-    pass
+def createQnA(request):
+    return HttpResponse("OK")
+
+def selectMyQuestion(request):
+    return HttpResponse("OK")
+
+def selectFAQ(request):
+    return HttpResponse("OK")
 
 
     """     REVIEW      """
-def createReview():
-    pass
-def deleteReview():
-    pass
+def createReview(request):
+    return HttpResponse("OK")
+
+def deleteReview(request):
+    return HttpResponse("OK")
 
 
     """     HOUSE       """
-def createHouse():
-    pass
-def updateHouse():
-    pass
-def selectCategoryHouse():
-    pass
-def selectLocationHouse():
-    pass
-def selectSearchHouse():
-    pass
-def selectDetailHouse():
-    pass
-def selectMenuHouse():
-    pass
-def selectReivewHouse():
-    pass
+def createHouse(request):
+    return HttpResponse("OK")
+
+def updateHouse(request):
+    return HttpResponse("OK")
+
+def selectCategoryHouse(request):
+    return HttpResponse("OK")
+
+def selectLocationHouse(request):
+    return HttpResponse("OK")
+
+def selectSearchHouse(request):
+    return HttpResponse("OK")
+
+def selectDetailHouse(request):
+    return HttpResponse("OK")
+
+def selectMenuHouse(request):
+    return HttpResponse("OK")
+
+def selectReivewHouse(request):
+    return HttpResponse("OK")
 
 
     """     NOTICE      """
-def selectNotice():
-    pass
+def selectNotice(request):
+    return HttpResponse("OK")
+
 
