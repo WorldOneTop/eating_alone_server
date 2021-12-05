@@ -8,6 +8,7 @@ class User(models.Model):
 
 class Review(models.Model):
     user_id_fk = models.ForeignKey("User", on_delete=models.CASCADE)
+    house_id_fk = models.ForeignKey("House_main", on_delete=models.CASCADE)
     body = models.TextField()
     hashtag = models.CharField(max_length=200, null=True)
     time = models.DateTimeField(auto_now=False, auto_now_add=True)
@@ -43,6 +44,11 @@ class Question(models.Model):
     image = models.CharField(max_length=60)
     category = models.CharField(max_length=20)
     user_id = models.ForeignKey("User", on_delete=models.CASCADE)
+
+class Notice(models.Model):
+    head = models.CharField(max_length=60)
+    body = models.TextField()
+    time = models.DateTimeField(auto_now=False, auto_now_add=True)
 
 """
 CREATE TABLE users(
