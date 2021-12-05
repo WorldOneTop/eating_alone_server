@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body style="margin:0;">
+<div id="map" style="width:100vw;height:100vh;"></div>
+
+<script type="text/javascript" src="https://dapi.kakao.com/v2/maps/sdk.js?appkey={{key}}&libraries=services"></script>
+<script>
+var mapContainer = document.getElementById('map'), // 지도를 표시할 div
+    mapOption = {
+        center: new kakao.maps.LatLng({{centerLat}},{{centerLng}}), // 지도의 중심좌표
+        level: {{zoomLevel}} // 지도의 확대 레벨
+    };
+
+// 지도 생성
+var map = new kakao.maps.Map(mapContainer, mapOption);
+
+var geocoder = new kakao.maps.services.Geocoder();
+var currentMarker;
+var imageBasicUrl = 'https://raw.githubusercontent.com/WorldOneTop/eating_alone_map/master/assets/images/markers/';
+
+function createMarker(item) {
+    marker = new kakao.maps.Marker({
+        map: map,
+        position: new kakao.maps.LatLng(item.lat, item.lng),
+        image: new kakao.maps.MarkerImage(imageBasicUrl + item.image_file, new kakao.maps.Size(60, 54)),
+    });
+    if( {{ hasListener }} ){
+        kakao.maps.event.addListener(marker, 'click', function(){
+            onClickMarker.postMessage(item.name);
+            map.panTo(new kakao.maps.LatLng(result[0].y, result[0].x));
+        });
+    }
+}
+function createCurrentMarker(lat,lng) {
+    if(currentMarker){
+        currentMarker.setPosition(new kakao.maps.LatLng(lat, lng));
+    }else{
+        currentMarker = new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng(lat, lng),
+            image: new kakao.maps.MarkerImage(imageBasicUrl + '나.png', new kakao.maps.Size(45, 41)),
+        });
+    }
+     map.panTo(new kakao.maps.LatLng(lat, lng));
+}
+
+function sendCoordConvert(lat, lng){
+    geocoder.coord2Address(lng, lat, function(result, status) {
+        if (status === kakao.maps.services.Status.OK) {
+            CoordConvertListener.postMessage(result[0].address.address_name);
+        }
+    });
+}
+
+function postMessage(strItems) {
+    var items = JSON.parse(strItems);
+    for(var i=0; i<items.length; i++) {
+        createMarker(items[i]);
+    }
+}
+
+
+
+</script>
+</body>
+</html>
