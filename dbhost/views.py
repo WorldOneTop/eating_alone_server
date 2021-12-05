@@ -25,3 +25,67 @@ def kakaoMap(request):
     getValue['hasListener'] = request.GET['hasListener']
 
     return render(request, 'dbhost/kakaomap.html',getValue);
+
+
+    """     ACCOUNT     """
+def login():
+    pass
+def logout():
+    pass
+def signUp():
+    pass
+def accoutOut():#회원탈퇴
+    pass
+def updateNickname():
+    pass
+def updateImage():
+    pass
+def updatePassword():
+    pass
+def findAccount():
+    pass
+def selectMyReview():
+    pass
+def selectMyHouse():
+    pass
+
+
+    """     QUESTION    """
+def createQnA():
+    pass
+def selectMyQuestion():
+    pass
+def selectFAQ():
+    pass
+
+
+    """     REVIEW      """
+def createReview():
+    pass
+def deleteReview():
+    pass
+
+
+    """     HOUSE       """
+def createHouse():
+    pass
+def updateHouse():
+    pass
+def selectCategoryHouse():
+    pass
+def selectLocationHouse():
+    pass
+def selectSearchHouse():
+    pass
+def selectDetailHouse():
+    pass
+def selectMenuHouse():
+    pass
+def selectReivewHouse():
+    pass
+
+
+    """     NOTICE      """
+def selectNotice():
+    pass
+
