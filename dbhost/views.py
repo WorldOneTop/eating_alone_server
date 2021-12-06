@@ -14,7 +14,7 @@ from .models import User, Review, Image, House_main, House_detail, House_menu, Q
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-'''  다 하고 할거 : 이미지 처리, 문자 보내기 처리  '''
+'''  다 하고 할거 : select 처리, 이미지 처리, 문자 보내기 처리  '''
 
 
 
@@ -114,7 +114,7 @@ def updatePassword(request): # args : id, password, newPassword
 
     data = request.GET.dict()
 
-    if(not checkUserFormatNick(data['newPassword'])):
+    if(not checkUserFormatPw(data['newPassword'])):
         return HttpResponse('password format mismatch')
 
     User.objects.filter(pk=data['id']).update(password=data['newPassword'])
