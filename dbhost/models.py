@@ -2,7 +2,7 @@ from django.db import models
 
 class User(models.Model):
     id = models.CharField(max_length=11, primary_key=True)
-    password = models.CharField(max_length=11)
+    password = models.CharField(max_length=64)
     nickName = models.CharField(max_length=20)
     image = models.CharField(max_length=20, null=True)
 

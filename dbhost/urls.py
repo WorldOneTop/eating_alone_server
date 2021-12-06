@@ -5,7 +5,6 @@ from . import views
 urlpatterns = [
     path('kakaomap/', views.kakaoMap, name='kakaomap'),
     path('login/',views.login),
-    path('logout/',views.logout),
     path('signUp/',views.signUp),
     path('accoutOut/',views.accoutOut),
     path('updateNickname/',views.updateNickname),
