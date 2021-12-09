@@ -13,8 +13,10 @@ from .models import User, Review, Image, House_main, House_detail, House_menu, Q
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CATEGORY_MENU = ['한식', '분식', '카페', '일식', '치킨', '피자', '양식', '주식', '도시락', '패스트푸드', '기타']
+CATEGORY_QUESTION = ['계정', '이용문의', '불편사항', '정보등록', '기타']
 
-'''  다 하고 할거 : select 처리, 이미지 처리, 문자 보내기 처리  '''
+'''  다 하고 할거 : 이미지 처리, 문자 보내기 처리  '''
 
 
 
@@ -146,7 +148,20 @@ def selectMyHouse(request):
 
 
     """     QUESTION    """
-def createQnA(request):
+
+def createQnA(request): # args: head, body, category, user_id, {image}
+    data = request.GET.dict()
+    try:
+        data['user_id'] = User.objects.get(pk=data['user_id'])
+    except User.DoesNotExist:
+        return HttpResponse('해당 아이디가 존재하지않습니다.')
+
+    if(data['category'] not in CATEGORY_QUESTION):
+        return HttpResponse('카테고리를 올바르게 입력해주세요.')
+    try:
+        Question.objects.create(**data)
+    except IntegrityError:
+        return HttpResponse('data is not enough')
     return HttpResponse()
 
 def selectMyQuestion(request):
@@ -157,18 +172,80 @@ def selectFAQ(request):
 
 
     """     REVIEW      """
-def createReview(request):
+def createReview(request): # args: user_id_fk, house_id_fk, body, rating, {hashtag}
+    data = request.GET.dict()
+    try:
+        data['user_id_fk'] = User.objects.get(pk=data['user_id_fk'])
+        data['house_id_fk'] = House_main.objects.get(pk=data['house_id_fk'])
+    except User.DoesNotExist:
+        return HttpResponse('user is does not exist')
+    except House_main.DoesNotExist:
+        return HttpResponse('restaurant is does not exist')
+    try:
+        Review.objects.create(**data)
+    except IntegrityError:
+        return HttpResponse('data is not enough')
+
+    data['house_id_fk'].rating = (data['house_id_fk'].rating * data['house_id_fk'].review_count + int(data['rating'])) / (data['house_id_fk'].review_count + 1)
+    data['house_id_fk'].review_count += 1
+    data['house_id_fk'].save()
     return HttpResponse()
 
-def deleteReview(request):
+def deleteReview(request): # args: id
+    try:
+        review = Review.objects.get(pk=request.GET['id'])
+    except Review.DoesNotExist:
+        return HttpResponse('review is does not exist')
+    house = review.house_id_fk
+
+    if(house.review_count - 1 == 0):
+        house.rating = 0
+    else:
+        house.rating = (house.rating*house.review_count - review.rating) / (house.review_count - 1)
+    house.review_count -= 1
+    house.save()
+
+    review.delete()
+
     return HttpResponse()
 
 
     """     HOUSE       """
-def createHouse(request):
+def createHouse(request): # agrs: name, location, category, info, lat,lng, {time,number}
+    data = request.GET.dict()
+    data_main = {'name':data.pop('name'), 'location':data.pop('location'), 'category':data.pop('category')}
+
+    if(data_main['category'] not in CATEGORY_MENU):
+        return HttpResponse('카테고리를 올바르게 입력해주세요.')
+
+    data['house_id_fk'] = House_main.objects.create(**data_main)
+    try:
+        House_detail.objects.create(**data)
+    except IntegrityError:
+        return HttpResponse('data is not enough')
+
+
     return HttpResponse()
 
-def updateHouse(request):
+def updateHouse(request): # args: id, {name, category, location,price_image_id, profile_image_id, lat, lng, info, number, time}
+    data = request.GET.dict()
+    try:
+        data_detail = {'house_id_fk' : House_main.objects.get(pk=data['id'])}
+    except User.DoesNotExist:
+        return HttpResponse('해당 아이디가 존재하지않습니다.')
+
+    if 'info' in data : data_detail['info'] = data.pop('info')
+    if 'time' in data : data_detail['time'] = data.pop('time')
+    if 'lat' in data : data_detail['lat'] = data.pop('lat')
+    if 'lng' in data : data_detail['lng'] = data.pop('lng')
+    if 'number' in data : data_detail['number'] = data.pop('number')
+
+    if(len(data_detail) > 1):
+        House_detail.objects.filter(pk=data['id']).update(**data_detail)
+
+    if(len(data) > 1):
+        House_main.objects.filter(pk=data['id']).update(**data)
+
     return HttpResponse()
 
 def selectCategoryHouse(request):

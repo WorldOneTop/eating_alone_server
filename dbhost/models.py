@@ -12,12 +12,14 @@ class Review(models.Model):
     body = models.TextField()
     hashtag = models.CharField(max_length=200, null=True)
     time = models.DateTimeField(auto_now=False, auto_now_add=True)
+    rating = models.DecimalField(max_digits=2,decimal_places=1)
 
 class Image(models.Model):
     url = models.CharField(max_length=20, primary_key=True)
     review_id_fk = models.ForeignKey("Review", on_delete=models.CASCADE)
 
 class House_main(models.Model):
+    name = models.CharField(max_length=20)
     category = models.CharField(max_length=10)
     rating = models.DecimalField(max_digits=2,decimal_places=1, default=0.0)
     review_count = models.PositiveSmallIntegerField(default=0)
@@ -31,6 +33,7 @@ class House_detail(models.Model):
     time = models.CharField(max_length=120, null=True)
     lat = models.DecimalField(max_digits=9,decimal_places=7)
     lng = models.DecimalField(max_digits=10,decimal_places=7)
+    number = models.CharField(max_length=11, null=True)
 
 class House_menu(models.Model):
     house_id_fk = models.ForeignKey("House_main", on_delete=models.CASCADE)
@@ -41,7 +44,7 @@ class House_menu(models.Model):
 class Question(models.Model):
     head = models.CharField(max_length=60)
     body = models.TextField()
-    image = models.CharField(max_length=60)
+    image = models.CharField(max_length=60, null=True)
     category = models.CharField(max_length=20)
     user_id = models.ForeignKey("User", on_delete=models.CASCADE)
 
