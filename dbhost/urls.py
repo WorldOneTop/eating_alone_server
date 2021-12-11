@@ -23,8 +23,9 @@ urlpatterns = [
     path('selectCategoryHouse/',views.selectCategoryHouse),
     path('selectLocationHouse/',views.selectLocationHouse),
     path('selectSearchHouse/',views.selectSearchHouse),
-    path('selectDetailHouse/',views.selectDetailHouse),
-    path('selectMenuHouse/',views.selectMenuHouse),
-    path('selectReivewHouse/',views.selectReivewHouse),
+    path('selectHouseName/',views.selectHouseName),
+    path('selectHouseInfo/',views.selectHouseInfo),
+    path('selectHouseMenu/',views.selectHouseMenu),
+    path('selectHouseReview/',views.selectHouseReview),
     path('selectNotice/',views.selectNotice),
 ]

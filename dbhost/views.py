@@ -9,7 +9,7 @@ import string
 import random
 from django.db import IntegrityError
 
-from .models import User, Review, Image, House_main, House_detail, House_menu, Question
+from .models import User, Review, Image, House_main, House_detail, House_menu, Question, Notice, Answer
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,7 +17,7 @@ CATEGORY_MENU = ['한식', '분식', '카페', '일식', '치킨', '피자', '�
 CATEGORY_QUESTION = ['계정', '이용문의', '불편사항', '정보등록', '기타']
 
 '''  다 하고 할거 : 이미지 처리, 문자 보내기 처리  '''
-
+# 전국 행정구역 엑셀: http://kssc.kostat.go.kr/ksscNew_web/kssc/common/CommonBoardList.do?gubun=1&strCategoryNameCode=019&strBbsId=kascrr&categoryMenu=014
 
 
 def getKakaoMapKey():
@@ -138,19 +138,38 @@ def findAccount(request): # args : id
 
     user.update(password=result)
 
-    return HttpResponse('랜덤 문자열 : ' + randomStr + ' 번호로 보내기 처리 필요')
+    return HttpResponse('랜덤 문자열 : ' + randomStr + ' ,번호로 보내기 처리 필요')
 
-def selectMyReview(request):
-    return HttpResponse()
+def selectMyReview(request): # args: id
+    if(not request.GET['id']):
+        return HttpResponse()
+    objects = Review.objects.filter(user_id_fk=request.GET['id']).select_related('house_id_fk')
 
-def selectMyHouse(request):
-    return HttpResponse()
+    result = []
+
+    for obj in objects:
+        result.append({'review_id': obj.id, 'body': obj.body, 'house_id': obj.house_id_fk_id, 'time': obj.time.strftime("%Y.%m.%d"), 'house_name': obj.house_id_fk.name})
+
+    return HttpResponse(json.dumps(result, ensure_ascii=False)) # return: review_id, body, house_id, time,house_name
+
+def selectMyHouse(request): # args: id,id,id,id
+    if(not request.GET['id']):
+        return HttpResponse()
+
+    result = []
+
+    for id in request.GET['id'].split(','):
+        result.append(House_main.objects.filter(pk=id).values('name', 'profile_image', 'category', 'rating', 'review_count', 'location')[0])
+        result[-1]['rating'] = c(result[-1]['rating'])
+
+    return HttpResponse(json.dumps(result, ensure_ascii=False)) # return: name, profile_image, category, rating, review_count, location
 
 
     """     QUESTION    """
 
 def createQnA(request): # args: head, body, category, user_id, {image}
     data = request.GET.dict()
+
     try:
         data['user_id'] = User.objects.get(pk=data['user_id'])
     except User.DoesNotExist:
@@ -164,11 +183,26 @@ def createQnA(request): # args: head, body, category, user_id, {image}
         return HttpResponse('data is not enough')
     return HttpResponse()
 
-def selectMyQuestion(request):
-    return HttpResponse()
+def selectMyQuestion(request): # args: id
+    if(not request.GET['id']):
+        return HttpResponse()
 
-def selectFAQ(request):
-    return HttpResponse()
+    objects = Question.objects.filter(user_id=request.GET['id'])
+    result = []
+
+    for obj in objects:
+        result.append({'head':obj.head, 'body':obj.body, 'time':obj.time.strftime("%Y.%m.%d")})
+        try:
+            result[-1]['answer'] = Answer.objects.get(pk=obj.id)
+        except Answer.DoesNotExist:
+            pass
+
+    return HttpResponse(json.dumps(result, ensure_ascii=False)) # return: head, body, time, answer_body
+
+def selectFAQ(request): # args: category
+    result = Question.objects.filter(category=request.GET['category'], user_id=None).values('head','body')[0]
+
+    return HttpResponse(json.dumps(result, ensure_ascii=False)) # return: head, body
 
 
     """     REVIEW      """
@@ -185,6 +219,11 @@ def createReview(request): # args: user_id_fk, house_id_fk, body, rating, {hasht
         Review.objects.create(**data)
     except IntegrityError:
         return HttpResponse('data is not enough')
+
+    if(data['house_id_fk'].rating < 0):
+        data['house_id_fk'].rating = 0
+    elif(data['house_id_fk'].rating > 5):
+        data['house_id_fk'].rating = 5
 
     data['house_id_fk'].rating = (data['house_id_fk'].rating * data['house_id_fk'].review_count + int(data['rating'])) / (data['house_id_fk'].review_count + 1)
     data['house_id_fk'].review_count += 1
@@ -248,27 +287,74 @@ def updateHouse(request): # args: id, {name, category, location,price_image_id, 
 
     return HttpResponse()
 
-def selectCategoryHouse(request):
-    return HttpResponse()
+def selectCategoryHouse(request): # agrs: category, location_1, {location_2, location_3}
+    result = House_main.objects.filter(**(request.GET.dict())).values('id', 'rating', 'name', 'review_count', 'profile_image')
+    for obj in result:
+        obj['rating'] = float(obj['rating'])
 
-def selectLocationHouse(request):
-    return HttpResponse()
+    return HttpResponse(json.dumps((list(result)), ensure_ascii=False))# return: id, rating, name, review_count, profile_image
 
-def selectSearchHouse(request):
-    return HttpResponse()
+def selectLocationHouse(request): # agrs: {category}, location_1, {location_2, location_3}
+    data = request.GET.dict()
+    data['house_id_fk__location_1'] = data.pop('location_1')
+    if 'location_2' in data:
+        data['house_id_fk__location_2'] = data.pop('location_2')
+    if 'location_3' in data:
+        data['house_id_fk__location_3'] = data.pop('location_3')
 
-def selectDetailHouse(request):
-    return HttpResponse()
+    objects = House_detail.objects.select_related('house_id_fk').filter(**data)
+    result = []
 
-def selectMenuHouse(request):
-    return HttpResponse()
+    for obj in objects:
+        result.append({'id':obj.house_id_fk_id, 'rating':float(obj.house_id_fk.rating), 'name':obj.house_id_fk.name, 'review_count':obj.house_id_fk.review_count, 'profile_image':obj.house_id_fk.profile_image, 'lat':float(obj.lat), 'lng':float(obj.lng)})
 
-def selectReivewHouse(request):
-    return HttpResponse()
+    return HttpResponse(json.dumps((list(result)), ensure_ascii=False)) # return: id, rating, name, review_count, profile_image, lat, lng
+
+def selectSearchHouse(request): # args: name, location_1, {location_2, location_3}
+    data = request.GET.dict()
+    data['name__contains'] = data.pop('name')
+
+    result = House_main.objects.filter(**data).values('id', 'rating', 'name', 'review_count', 'category', 'profile_image')
+
+    for obj in result:
+        obj['rating'] = float(obj['rating'])
+
+    return HttpResponse(json.dumps((list(result)), ensure_ascii=False)) # return: id, rating, name, review_count, category, profile_image
+
+def selectHouseName(request): # args: location_1, {location_2, location_3}
+    result = House_main.objects.filter(**(request.GET.dict())).values('name')
+    return HttpResponse(json.dumps((list(result)), ensure_ascii=False)) # return: [name]
+
+def selectHouseInfo(request): # args: id
+    result = House_detail.objects.filter(pk=request.GET['id']).values('info', 'time', 'lat', 'lng', 'number')
+    return HttpResponse(result) # return: info, time, lat, lng, number
+
+def selectHouseMenu(request): # args: id
+    if(not request.GET['id']):
+        return HttpResponse()
+
+    result = House_menu.objects.filter(house_id_fk=request.GET['id']).values('name', 'price', 'image')
+
+    return HttpResponse(str(list(result))) # return: [name, price, image]
+
+def selectHouseReview(request): # args: id
+    if(not request.GET['id']):
+        return HttpResponse()
+
+    objects = Review.objects.filter(house_id_fk=request.GET['id']).select_related('user_id_fk')
+
+    result = []
+
+    for obj in objects:
+        result.append({'user_id': obj.user_id_fk_id, 'user_image': obj.user_id_fk.image,'user_nickName': obj.user_id_fk.nickName, 'time': obj.time.strftime("%Y.%m.%d"), 'body': obj.body, 'hashtag': obj.hashtag, 'rating': float(obj.rating), 'images': obj.images})
+    return HttpResponse(str(list(result))) # return: [user_id, user_image, user_nickName, time, body, hashtag, rating, images]
 
 
     """     NOTICE      """
-def selectNotice(request):
-    return HttpResponse()
+def selectNotice(request): # args:
+    result = Notice.objects.all().values('head', 'body', 'time')
 
+    for obj in result:
+        obj['time'] = obj['time'].strftime("%Y.%m.%d")
 
+    return HttpResponse(json.dumps(list(result), ensure_ascii=False)) # return: head, body, time

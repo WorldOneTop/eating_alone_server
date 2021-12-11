@@ -13,6 +13,8 @@ class Review(models.Model):
     hashtag = models.CharField(max_length=200, null=True)
     time = models.DateTimeField(auto_now=False, auto_now_add=True)
     rating = models.DecimalField(max_digits=2,decimal_places=1)
+    images = models.CharField(max_length=100, null=True) # 5장
+
 
 class Image(models.Model):
     url = models.CharField(max_length=20, primary_key=True)
@@ -23,7 +25,10 @@ class House_main(models.Model):
     category = models.CharField(max_length=10)
     rating = models.DecimalField(max_digits=2,decimal_places=1, default=0.0)
     review_count = models.PositiveSmallIntegerField(default=0)
-    location = models.CharField(max_length=70)
+    location = models.CharField(max_length=30)
+    location_1 = models.CharField(max_length=7) # 도, 세종특별자치시
+    location_2 = models.CharField(max_length=7) # 시군구
+    location_3 = models.CharField(max_length=7) # 읍면동
     price_image = models.ForeignKey("Image", on_delete=models.CASCADE, null=True, related_name="price_fk")
     profile_image = models.ForeignKey("Image", on_delete=models.CASCADE, null=True, related_name="profile_fk")
 
@@ -46,7 +51,12 @@ class Question(models.Model):
     body = models.TextField()
     image = models.CharField(max_length=60, null=True)
     category = models.CharField(max_length=20)
-    user_id = models.ForeignKey("User", on_delete=models.CASCADE)
+    user_id = models.ForeignKey("User", on_delete=models.CASCADE,null=True)
+    time = models.DateTimeField(auto_now=False, auto_now_add=True)
+
+class Answer(models.Model):
+    question_id_fk = models.ForeignKey("Question", on_delete=models.CASCADE, primary_key=True)
+    body = models.TextField()
 
 class Notice(models.Model):
     head = models.CharField(max_length=60)
