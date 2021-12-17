@@ -16,9 +16,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CATEGORY_MENU = ['한식', '분식', '카페', '일식', '치킨', '피자', '양식', '주식', '도시락', '패스트푸드', '기타']
 CATEGORY_QUESTION = ['계정', '이용문의', '불편사항', '정보등록', '기타']
 
-'''  다 하고 할거 : 이미지 처리, 문자 보내기 처리  '''
-# 전국 행정구역 엑셀: http://kssc.kostat.go.kr/ksscNew_web/kssc/common/CommonBoardList.do?gubun=1&strCategoryNameCode=019&strBbsId=kascrr&categoryMenu=014
+'''  할거 : 이미지 처리, 문자 보내기 처리  '''
 
+
+"""     KAKAOMAP        """
 
 def getKakaoMapKey():
     with open(BASE_DIR+'/secret.json', 'r') as f:
@@ -32,10 +33,10 @@ def kakaoMap(request):
 
     getValue['width'] = request.GET['width']
     getValue['height'] = request.GET['height']
-    getValue['centerLat'] = request.GET['centerLat']
-    getValue['centerLng'] = request.GET['centerLng']
+    getValue['centerAddr'] = request.GET['centerAddr']
     getValue['zoomLevel'] = request.GET['zoomLevel']
     getValue['hasListener'] = request.GET['hasListener']
+    getValue['hasClickListener'] = request.GET['hasClickListener']
 
     return render(request, 'dbhost/kakaomap.html',getValue);
 
@@ -160,7 +161,7 @@ def selectMyHouse(request): # args: id,id,id,id
 
     for id in request.GET['id'].split(','):
         result.append(House_main.objects.filter(pk=id).values('name', 'profile_image', 'category', 'rating', 'review_count', 'location')[0])
-        result[-1]['rating'] = c(result[-1]['rating'])
+        result[-1]['rating'] = float(result[-1]['rating'])
 
     return HttpResponse(json.dumps(result, ensure_ascii=False)) # return: name, profile_image, category, rating, review_count, location
 

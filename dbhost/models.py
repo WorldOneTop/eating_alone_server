@@ -13,7 +13,7 @@ class Review(models.Model):
     hashtag = models.CharField(max_length=200, null=True)
     time = models.DateTimeField(auto_now=False, auto_now_add=True)
     rating = models.DecimalField(max_digits=2,decimal_places=1)
-    images = models.CharField(max_length=100, null=True) # 5장
+    images = models.CharField(max_length=104, null=True) # 5장, 컴마4개
 
 
 class Image(models.Model):
@@ -49,7 +49,7 @@ class House_menu(models.Model):
 class Question(models.Model):
     head = models.CharField(max_length=60)
     body = models.TextField()
-    image = models.CharField(max_length=60, null=True)
+    image = models.CharField(max_length=62, null=True) # 3장 컴마 두개
     category = models.CharField(max_length=20)
     user_id = models.ForeignKey("User", on_delete=models.CASCADE,null=True)
     time = models.DateTimeField(auto_now=False, auto_now_add=True)

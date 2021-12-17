@@ -3,7 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('kakaomap/', views.kakaoMap, name='kakaomap'),
+    path('kakaomap/', views.kakaoMap),
     path('login/',views.login),
     path('signUp/',views.signUp),
     path('accoutOut/',views.accoutOut),
