@@ -40,6 +40,18 @@ def kakaoMap(request):
 
     return render(request, 'dbhost/kakaomap.html',getValue);
 
+def getFirebaseKey():
+    with open(BASE_DIR+'/secret.json', 'r') as f:
+        jf = json.load(f)
+
+    result = {}
+    for key, value in jf.items():
+        if('FIREBASE' in key):
+            result[key] = value
+    return result
+
+def firebase(request):
+    return render(request, 'dbhost/firebase.html',getFirebaseKey());
 
     """     ACCOUNT     """
 def checkUserFormatId(data):
@@ -153,7 +165,7 @@ def selectMyReview(request): # args: id
 
     return HttpResponse(json.dumps(result, ensure_ascii=False)) # return: review_id, body, house_id, time,house_name
 
-def selectMyHouse(request): # args: id,id,id,id
+def selectMyHouse(request): # args: id,id,id,id, ...
     if(not request.GET['id']):
         return HttpResponse()
 
@@ -165,6 +177,14 @@ def selectMyHouse(request): # args: id,id,id,id
 
     return HttpResponse(json.dumps(result, ensure_ascii=False)) # return: name, profile_image, category, rating, review_count, location
 
+def selectUserInfo(request): # args: id
+    if(not request.GET['id']):
+        return HttpResponse()
+
+    obj = User.objects.get(pk = request.GET['id'])
+    result = {'nickName':obj.nickName,'image':obj.image}
+
+    return HttpResponse(json.dumps(result, ensure_ascii=False)) # return: nickName, image
 
     """     QUESTION    """
 

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    <div id="recaptcha"></div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script>
+  const firebaseConfig = {
+    apiKey:"{{FIREBASE_apiKey}}" ,
+    authDomain: "{{FIREBASE_authDomain}}",
+    projectId:"{{FIREBASE_projectId}}" ,
+    storageBucket:"{{FIREBASE_storageBucket}}" ,
+    messagingSenderId:"{{FIREBASE_messagingSenderId}}",
+    appId:"{{FIREBASE_appId}}" ,
+    measurementId:"{{FIREBASE_measurementId}}"
+  };
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);;
+</script>
+<script>
+    firebase.auth().languageCode = 'ko';
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier(document.getElementById('recaptcha'), {
+  'size': 'invisible',
+  'callback': (response) => {
+    // reCAPTCHA solved, allow signInWithPhoneNumber.
+    onSignInSubmit();
+  }});
+function smsSend(phoneNumber){ // args : 1012341234 or "1012341234"
+    const appVerifier = window.recaptchaVerifier;
+    firebase.auth().signInWithPhoneNumber('+82 '+ phoneNumber, appVerifier)
+        .then((confirmationResult) => {
+          window.confirmationResult = confirmationResult;
+        }).catch((error) => {
+            if(error.code = "auth/captcha-check-failed"){
+                responseMsg.postMessage("captcha check failed");
+                //eCAPTCHA 응답 토큰이 유효하지 않거나 만료되었거
+            }else if(error.code = "auth/quota-exceeded"){
+                responseMsg.postMessage("quota exceeded");
+                //rebase 프로젝트의 SMS 할당량이 초과된 경우 발생합니다.
+            }
+            else{
+                responseMsg.postMessage("error");
+            }
+        });
+
+}
+function codeCheck(code){ // args : "123456"
+    confirmationResult.confirm(code).then((result) => {
+      const user = result.user;
+      user.delete().then(() => {});
+      responseMsg.postMessage("sueccess");
+    }).catch((error) => {
+        if(error.code = "auth/invalid-verification-code"){
+            responseMsg.postMessage("invalid verification code");
+        }else{
+            responseMsg.postMessage("error");
+        }
+      console.log(error);
+    });
+}
+
+</script>
+</body>
+</html>
