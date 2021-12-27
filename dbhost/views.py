@@ -64,6 +64,13 @@ def checkUserFormatImg(data):
     return 1 <= len(data) and len(data) < 20
 
 
+def checkId(request): # args : id
+    try:
+        User.objects.get(pk=request.GET['id'])
+    except User.DoesNotExist:
+        return HttpResponse()
+    return HttpResponse('이미 가입한 아이디입니다.')
+
 def login(request): # args : id, password
     data = request.GET.dict()
     try:
